@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>KNACKSAT-2 Decoder</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header>
+    <h1>KNACKSAT-2 Decoder</h1>
+    <p class="subtitle">
+      FSK9600 / AX.25 G3RUH telemetry decode via GNU Radio (gr-satellites), sourced from SatNOGS Network observations.
+    </p>
+  </header>
+
+  <section class="filters">
+    <label>Status
+      <select id="status">
+        <option value="good">good</option>
+        <option value="unknown">unknown</option>
+        <option value="bad">bad</option>
+        <option value="">any</option>
+      </select>
+    </label>
+    <label>Limit
+      <input id="limit" type="number" value="25" min="1" max="100" />
+    </label>
+    <button id="refresh">Refresh observations</button>
+  </section>
+
+  <section>
+    <table id="obs-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Start (UTC)</th>
+          <th>Station</th>
+          <th>Transmitter</th>
+          <th>Status</th>
+          <th>Audio</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="result-panel" hidden>
+    <h2>Decode result — observation <span id="result-obs-id"></span></h2>
+    <div id="result-meta"></div>
+    <table id="frames-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Src</th>
+          <th>Dest</th>
+          <th>PID</th>
+          <th>Info (hex)</th>
+          <th>Info (ascii)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <details>
+      <summary>Raw gr_satellites log (tail)</summary>
+      <pre id="result-log"></pre>
+    </details>
+  </section>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

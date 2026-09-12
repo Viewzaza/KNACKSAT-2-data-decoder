@@ -1,0 +1,23 @@
+name: KNACKSAT-2
+alternative_names:
+- KKS-2
+- HS0K
+norad: 67683
+data:
+  &tlm Telemetry:
+    unknown: true
+transmitters:
+  9k6 FSK UHF TLM:
+    frequency: 400.630e+6
+    modulation: FSK
+    baudrate: 9600
+    framing: AX.25 G3RUH
+    data:
+    - *tlm
+  9k6 FSK VHF Digipeater:
+    frequency: 145.825e+6
+    modulation: FSK
+    baudrate: 9600
+    framing: AX.25 G3RUH
+    data:
+    - *tlm

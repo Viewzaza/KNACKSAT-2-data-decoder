@@ -1,0 +1,12 @@
+name: knacksat2-decoder
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - gnuradio
+  - gnuradio-satellites
+  - pip
+  - pip:
+      - fastapi
+      - "uvicorn[standard]"
+      - httpx
