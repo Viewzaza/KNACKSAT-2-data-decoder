@@ -1,5 +1,6 @@
 data/audio/
 data/results/
+data/*.log
 __pycache__/
 *.pyc
 .venv/

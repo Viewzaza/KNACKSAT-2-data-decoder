@@ -6,6 +6,7 @@ from pathlib import Path
 from config import (
     AUDIO_DIR,
     GR_SATELLITES_BIN,
+    GR_SATELLITES_ENV,
     GR_SATELLITES_EXTRA_ARGS,
     GR_SATELLITES_TIMEOUT_SEC,
     RESULTS_DIR,
@@ -49,6 +50,7 @@ async def run_gr_satellites(observation_id: int, audio_path: Path) -> dict:
         *cmd,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.STDOUT,
+        env=GR_SATELLITES_ENV,
     )
     try:
         stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=GR_SATELLITES_TIMEOUT_SEC)

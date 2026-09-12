@@ -58,6 +58,20 @@ Verify gr-satellites is on PATH:
 gr_satellites --list_satellites
 ```
 
+**Note for this machine:** it already has a working `sdr` conda env at
+`C:\Users\<you>\miniconda3\envs\sdr` with `gnuradio` + `gnuradio-satellites`
+installed — `environment.yml` above doesn't need to be run here.
+`backend/config.py` auto-detects that env (via `GR_SATELLITES_CONDA_ENV`,
+defaulting to `~\miniconda3\envs\sdr`) and points `GR_SATELLITES_BIN` at
+`<env>\Library\bin\gr_satellites.exe` directly, and prepends that env's
+`Library\bin`/`Scripts`/etc. directories to `PATH` for the subprocess (a
+plain conda env executable isn't self-contained on Windows — without those
+directories on `PATH`, the DLL/`gnuradio` module isn't found even though the
+`.exe` runs). Only the lightweight web dependencies (FastAPI/uvicorn/httpx,
+in `.venv/`) need to be installed separately to run the FastAPI process
+itself; it just shells out to the conda env's `gr_satellites.exe` for the
+actual decode.
+
 ## Run
 
 ```powershell
@@ -74,7 +88,8 @@ Open http://localhost:8000
 |---|---|---|
 | `KNACKSAT2_NORAD_ID` | `67683` | NORAD ID used to query SatNOGS |
 | `KNACKSAT2_SATYAML` | `satyaml/KNACKSAT-2.yml` | satellite definition passed to gr_satellites |
-| `GR_SATELLITES_BIN` | `gr_satellites` | path to the executable, if not on PATH |
+| `GR_SATELLITES_CONDA_ENV` | `~\miniconda3\envs\sdr` | conda env root to source `gr_satellites.exe` and its `PATH` from, if it exists |
+| `GR_SATELLITES_BIN` | auto-detected exe in `GR_SATELLITES_CONDA_ENV`, else `gr_satellites` | explicit override for the executable path |
 | `GR_SATELLITES_EXTRA_ARGS` | *(empty)* | extra space-separated CLI flags, e.g. tuning `--f_offset` |
 | `GR_SATELLITES_TIMEOUT_SEC` | `600` | kill the decode subprocess after this long |
 | `KNACKSAT2_DATA_DIR` | `./data` | where downloaded audio + decode results are cached |
@@ -84,9 +99,12 @@ Open http://localhost:8000
 - The 400.630 MHz UHF telemetry downlink is outside the amateur allocation —
   this tool is receive-only (downloads existing public SatNOGS recordings and
   decodes them locally); it never transmits.
-- If frame counts come out as zero for a pass you know had signal, the most
-  likely knob to try first is `--f_offset` (via `GR_SATELLITES_EXTRA_ARGS`) —
-  demodulator defaults are tuned for typical SatNOGS recording conventions but
-  can vary per ground station audio pipeline.
+- Default demodulator parameters work fine as-is: confirmed against real
+  KNACKSAT-2 "good" observations (3 of 5 tested decoded real AX.25 frames,
+  e.g. dest `HS0AK-11` / src `HS0K-0`, info ending in `BCN`) and cross-checked
+  against gr-satellites' own official FSK9k6/AX.25-G3RUH reference recording
+  (US01). A zero-frame result for a specific pass is normal and expected —
+  SatNOGS "good" status reflects a human's visual read of the waterfall, not
+  a guarantee that the signal was strong enough to fully deframe.
 - Only a handful of observations exist for a newly-deployed satellite; widen
   the status filter to "any" in the UI if "good" returns nothing yet.
