@@ -37,6 +37,7 @@
           <th>Station</th>
           <th>Transmitter</th>
           <th>Status</th>
+          <th>Waterfall</th>
           <th>Audio</th>
           <th>Action</th>
         </tr>
@@ -47,6 +48,7 @@
 
   <section id="result-panel" hidden>
     <h2>Decode result — observation <span id="result-obs-id"></span></h2>
+    <img id="result-waterfall" class="result-waterfall" alt="Waterfall for this observation" hidden />
     <div id="result-meta"></div>
     <table id="frames-table">
       <thead>
@@ -66,6 +68,10 @@
       <pre id="result-log"></pre>
     </details>
   </section>
+
+  <div id="lightbox" class="lightbox" hidden>
+    <img id="lightbox-img" alt="Waterfall (full size)" />
+  </div>
 
   <script src="/static/app.js"></script>
 </body>

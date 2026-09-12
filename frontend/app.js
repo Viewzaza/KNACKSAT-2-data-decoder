@@ -2,9 +2,23 @@ const tbody = document.querySelector("#obs-table tbody");
 const refreshBtn = document.getElementById("refresh");
 const resultPanel = document.getElementById("result-panel");
 const resultObsId = document.getElementById("result-obs-id");
+const resultWaterfall = document.getElementById("result-waterfall");
 const resultMeta = document.getElementById("result-meta");
 const resultLog = document.getElementById("result-log");
 const framesBody = document.querySelector("#frames-table tbody");
+const lightbox = document.getElementById("lightbox");
+const lightboxImg = document.getElementById("lightbox-img");
+
+const obsById = new Map();
+
+function openLightbox(src) {
+  lightboxImg.src = src;
+  lightbox.hidden = false;
+}
+lightbox.addEventListener("click", () => { lightbox.hidden = true; });
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") lightbox.hidden = true;
+});
 
 async function fetchObservations() {
   const status = document.getElementById("status").value;
@@ -12,20 +26,23 @@ async function fetchObservations() {
   const params = new URLSearchParams({ limit });
   if (status) params.set("status", status);
 
-  tbody.innerHTML = `<tr><td colspan="7">Loading…</td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="8">Loading…</td></tr>`;
   try {
     const resp = await fetch(`/api/observations?${params}`);
     if (!resp.ok) throw new Error(await resp.text());
     const obs = await resp.json();
     renderObservations(obs);
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="7">Error: ${escapeHtml(String(err))}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8">Error: ${escapeHtml(String(err))}</td></tr>`;
   }
 }
 
 function renderObservations(obs) {
+  obsById.clear();
+  for (const o of obs) obsById.set(o.id, o);
+
   if (obs.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7">No observations found for these filters.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8">No observations found for these filters.</td></tr>`;
     return;
   }
   tbody.innerHTML = "";
@@ -37,9 +54,23 @@ function renderObservations(obs) {
       <td>${escapeHtml(o.station_name ?? "")}</td>
       <td>${escapeHtml(o.transmitter_description ?? o.transmitter_mode ?? "")}</td>
       <td><span class="tag">${escapeHtml(o.status ?? "")}</span></td>
+      <td></td>
       <td>${o.has_audio ? "yes" : "no"}</td>
       <td></td>
     `;
+    const waterfallCell = tr.children[5];
+    if (o.waterfall) {
+      const img = document.createElement("img");
+      img.className = "waterfall-thumb";
+      img.src = o.waterfall;
+      img.loading = "lazy";
+      img.alt = `Waterfall for observation ${o.id}`;
+      img.onclick = () => openLightbox(o.waterfall);
+      waterfallCell.appendChild(img);
+    } else {
+      waterfallCell.textContent = "—";
+    }
+
     const actionCell = tr.lastElementChild;
     const btn = document.createElement("button");
     btn.textContent = "Decode";
@@ -88,6 +119,15 @@ function showResult(obsId, result) {
   resultObsId.textContent = obsId;
   resultMeta.textContent = `${result.frame_count} AX.25 frame(s) decoded in ${result.duration_sec}s.`;
   resultLog.textContent = result.log_tail;
+
+  const waterfall = obsById.get(obsId)?.waterfall;
+  if (waterfall) {
+    resultWaterfall.src = waterfall;
+    resultWaterfall.hidden = false;
+    resultWaterfall.onclick = () => openLightbox(waterfall);
+  } else {
+    resultWaterfall.hidden = true;
+  }
 
   framesBody.innerHTML = "";
   result.frames.forEach((f, i) => {
