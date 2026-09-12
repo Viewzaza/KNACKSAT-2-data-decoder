@@ -125,6 +125,7 @@ pre {
   margin: 12px 0;
   cursor: zoom-in;
 }
+.result-waterfall[hidden] { display: none; }
 
 .lightbox {
   position: fixed;
@@ -138,6 +139,7 @@ pre {
   z-index: 1000;
   cursor: zoom-out;
 }
+.lightbox[hidden] { display: none; }
 
 .lightbox img {
   max-width: 100%;
